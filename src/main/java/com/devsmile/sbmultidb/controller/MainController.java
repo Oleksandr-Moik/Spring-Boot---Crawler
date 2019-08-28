@@ -2,6 +2,7 @@ package com.devsmile.sbmultidb.controller;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.jsoup.Jsoup;
@@ -17,17 +18,19 @@ public class MainController {
     // зробити мапу для /tag/{categoty}
     // там зроти if на вхідний параметр
     
-    @GetMapping
-    public String homePage() throws Exception {
-        return crawCategory();
-    }
+    private HashSet<String> links;
+    private String aLink="https://ain.ua/";
     
+    @GetMapping(value = "/")
     private String crawCategory() throws Exception {
 //        Map<URL, String> links = new HashMap<URL, String>();
-        URL ainUA = new URL("https://ain.ua");
-        String htmlRes = "<h1>Select category:</h1>";
+        String htmlRes = "";
+        
 
-        Document document = Jsoup.connect(ainUA.toString()).get();
+        Document document = Jsoup.connect(aLink).get();
+
+        // кравлити не всю сторінку, а блок(-и) з порібним вмістом
+        // знайти спільні назви класів блоків
 
         Elements elements = document.select("a[href]");
         // зберігати посилення в сеті
@@ -46,5 +49,7 @@ public class MainController {
 
         return htmlRes;
     }
-
+    
+//    @GetMapping(value = "/tag/{category}")
+//    public 
 }
