@@ -2,7 +2,6 @@ package com.devsmile.sbmultidb.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,31 +9,47 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devsmile.sbmultidb.service.WebCrawlerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class MainController {
 
-    @Autowired
-    private WebCrawlerService webCrawlerService;
+//    private Logger log  = LoggerFactory.getLogger(MainController.class);
+    
+    
+    private final WebCrawlerService webCrawlerService;
     
     @GetMapping(value = "/")
     public Map<String, String> getCategoties() throws Exception {
-        return webCrawlerService.getCategoties();
+        log.info("Call getCategories");
+        
+        Map<String, String> result = webCrawlerService.getCategoties();
+        
+        log.info("Result: {}", result);
+        return result;
     }
     
-    @GetMapping(value = "/tag/{categoty}")
-    public Map<String, String> getArticles(
-            @PathVariable(value = "categoty")String category) throws Exception{
-        webCrawlerService.setCategory(category);
-        return webCrawlerService.getArticles(1);
+    @GetMapping(value = "/tag/{category}")
+    public Map<String, String> getArticlesOnFirstPage(
+            @PathVariable String category) throws Exception{
+        log.info("Call getArticlesOnFirstPage");
+
+        Map<String, String> result = webCrawlerService.getArticles(category, 1);
+        log.info("Result: {}", result);
+        return result;
     }
     
-    @GetMapping(value = "/tag/{categoty}/{page}")
-    public Map<String, String> getArticlesOnPage(
-            @PathVariable(value = "categoty")String category,
-            @PathVariable(value = "page")int page) throws Exception{
-        webCrawlerService.setCategory(category);
-        return webCrawlerService.getArticles(page);
+    @GetMapping(value = "/tag/{category}/{pageNumber}")
+    public Map<String, String> getArticlesOnPageByNum(
+            @PathVariable String category,
+            @PathVariable Integer pageNumber) throws Exception{
+        log.info("Call getArticlesOnPageByNum,category {}, page: {}",category, pageNumber);
+        
+        Map<String, String> result = webCrawlerService.getArticles(category, pageNumber);
+        log.info("Result: {}", result);
+        
+        return result;
     }
 }
