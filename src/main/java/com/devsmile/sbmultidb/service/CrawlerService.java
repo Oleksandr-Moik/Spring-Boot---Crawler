@@ -19,35 +19,37 @@ public class CrawlerService {
     private String mainUrl;
     private final String ARTICLE_PAGINATION_URL_PATTERN = "%s/tag/%s/page/%d";
 
-    public Map<String, String> getPageLinks(String category, Integer page) throws Exception {
+    public Map<String, String> get(String category, Integer page) throws Exception {
+        if (category == null) {
+            return getPageLinks(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
+        } else {
+            return getPageLinks(String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page),
+                                "a[class^=\"post-link\"]");
+        }
+    }
+
+    private Map<String, String> getPageLinks(String url, String selectQuery) throws Exception {
         Map<String, String> linksMap = new HashMap<>();
 
-        String selectElements = (category == null) ? "div[class=tags-block web-view] div[class=block-title]"
-                : "a[class^=\"post-link\"]";
-        String connectUrl;
-        
-        if (category == null) {
-            connectUrl = mainUrl;
-        } else {
-            if (page == null) {
-                page = 1;
-            }
-            connectUrl = String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page);
-        }
+        Document document = Jsoup.connect(url).get();
+        Elements links = document.select(selectQuery);
 
-        Document document = Jsoup.connect(connectUrl).get();
-        Elements links = document.select(selectElements);
-
-        if (category == null) {
-            Elements unnecessaryLinks = links.select("a");
-            links.clear();
-            unnecessaryLinks.stream()
-                .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")))
-                .forEach(a -> links.add(a));
+        if (selectQuery.startsWith("div")) {
+            links = clearUnnecessaryLinks(links);
         }
 
         links.stream().forEach(a -> linksMap.put(a.attr("href"), a.text()));
 
         return linksMap;
     }
+
+    private static Elements clearUnnecessaryLinks(Elements links) {
+        Elements result = new Elements();
+        links.select("a")
+            .stream()
+            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")))
+            .forEach(a -> result.add(a));
+        return result;
+    }
+
 }

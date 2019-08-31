@@ -21,9 +21,13 @@ public class CrawlerController {
     @GetMapping({ "/", "/tag/{category}", "/tag/{category}/{page}" })
     public Map<String, String> getPage(@PathVariable(required = false) String category,
             @PathVariable(required = false) Integer page) throws Exception {
-        log.info("Call getPage with params: category = {}, page = {}",category, page);
+        log.info("Call getPage with params: category = {}, page = {}", category, page);
 
-        Map<String, String> result = crawlerService.getPageLinks(category, page);
+        if (page == null) {
+            page = 1;
+        }
+        
+        Map<String, String> result = crawlerService.get(category, page);
 
         log.info("Result: {}", result);
         return result;
