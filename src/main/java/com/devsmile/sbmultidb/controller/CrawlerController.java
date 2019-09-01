@@ -26,10 +26,6 @@ public class CrawlerController {
         if (page == null) {
             page = 1;
         }
-        
-        Map<String, String> result = crawlerService.get(category, page);
-
-        log.info("Result: {}", result);
-        return result;
+        return crawlerService.getLinks(category, page);
     }
 }

@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CrawlerService {
@@ -19,16 +21,16 @@ public class CrawlerService {
     private String mainUrl;
     private final String ARTICLE_PAGINATION_URL_PATTERN = "%s/tag/%s/page/%d";
 
-    public Map<String, String> get(String category, Integer page) throws Exception {
+    public Map<String, String> getLinks(String category, Integer page) throws Exception {
         if (category == null) {
-            return getPageLinks(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
+            return getLinksOnPage(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
         } else {
-            return getPageLinks(String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page),
+            return getLinksOnPage(String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page),
                                 "a[class^=\"post-link\"]");
         }
     }
 
-    private Map<String, String> getPageLinks(String url, String selectQuery) throws Exception {
+    private Map<String, String> getLinksOnPage(String url, String selectQuery) throws Exception {
         Map<String, String> linksMap = new HashMap<>();
 
         Document document = Jsoup.connect(url).get();
@@ -37,9 +39,10 @@ public class CrawlerService {
         if (selectQuery.startsWith("div")) {
             links = clearUnnecessaryLinks(links);
         }
-
+        
         links.stream().forEach(a -> linksMap.put(a.attr("href"), a.text()));
 
+        log.info("Result linksMap: {}",linksMap);
         return linksMap;
     }
 
