@@ -37,22 +37,14 @@ public class CrawlerService {
         Map<String, String> linksMap = new HashMap<>();
 
         Document document = Jsoup.connect(url).get();
-        Elements links = filterLinks(document.select(selectPattern));
-        
-        links.stream().forEach(a -> linksMap.put(a.attr("href"), a.text()));
+        Elements links = document.select(selectPattern).select("a");
+
+        links.stream()
+            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")
+                    || a.className().equals("post-link with-labels")))
+            .forEach(a -> linksMap.put(a.attr("href"), a.text()));
 
         log.info("Result linksMap: {}", linksMap);
         return linksMap;
     }
-
-    private Elements filterLinks(Elements links) {
-        Elements result = new Elements();
-        links.select("a")
-            .stream()
-            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")
-                    || a.className().equals("post-link with-labels")))
-            .forEach(a -> result.add(a));
-        return result;
-    }
-
 }
