@@ -40,8 +40,8 @@ public class CrawlerService {
         Elements links = document.select(selectPattern).select("a");
 
         links.stream()
-            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")
-                    || a.className().equals("post-link with-labels")))
+            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/"))
+                    || a.className().equals("post-link with-labels"))
             .forEach(a -> linksMap.put(a.attr("href"), a.text()));
 
         log.info("Result linksMap: {}", linksMap);
