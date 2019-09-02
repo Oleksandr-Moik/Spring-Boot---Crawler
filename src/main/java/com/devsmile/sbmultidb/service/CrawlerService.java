@@ -1,7 +1,8 @@
 package com.devsmile.sbmultidb.service;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,24 +26,20 @@ public class CrawlerService {
         if (category == null) {
             return getLinksOnPage(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
         } else {
-            if (page == null) {
-                page = 1;
-            }
+            page = Optional.ofNullable(page).orElse(1).intValue();
             return getLinksOnPage(String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page),
                                   "a[class^=\"post-link\"]");
         }
     }
 
     private Map<String, String> getLinksOnPage(String url, String selectPattern) throws Exception {
-        Map<String, String> linksMap = new HashMap<>();
-
         Document document = Jsoup.connect(url).get();
         Elements links = document.select(selectPattern).select("a");
 
-        links.stream()
+        Map<String, String> linksMap = links.stream()
             .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/"))
                     || a.className().equals("post-link with-labels"))
-            .forEach(a -> linksMap.put(a.attr("href"), a.text()));
+            .collect(Collectors.toMap(e -> e.attr("href"), e -> e.text()));
 
         log.info("Result linksMap: {}", linksMap);
         return linksMap;
