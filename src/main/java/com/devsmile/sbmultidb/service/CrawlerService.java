@@ -25,32 +25,32 @@ public class CrawlerService {
         if (category == null) {
             return getLinksOnPage(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
         } else {
+            if (page == null) {
+                page = 1;
+            }
             return getLinksOnPage(String.format(ARTICLE_PAGINATION_URL_PATTERN, mainUrl, category, page),
-                                "a[class^=\"post-link\"]");
+                                  "a[class^=\"post-link\"]");
         }
     }
 
-    private Map<String, String> getLinksOnPage(String url, String selectQuery) throws Exception {
+    private Map<String, String> getLinksOnPage(String url, String selectPattern) throws Exception {
         Map<String, String> linksMap = new HashMap<>();
 
         Document document = Jsoup.connect(url).get();
-        Elements links = document.select(selectQuery);
-
-        if (selectQuery.startsWith("div")) {
-            links = clearUnnecessaryLinks(links);
-        }
+        Elements links = filterLinks(document.select(selectPattern));
         
         links.stream().forEach(a -> linksMap.put(a.attr("href"), a.text()));
 
-        log.info("Result linksMap: {}",linksMap);
+        log.info("Result linksMap: {}", linksMap);
         return linksMap;
     }
 
-    private static Elements clearUnnecessaryLinks(Elements links) {
+    private Elements filterLinks(Elements links) {
         Elements result = new Elements();
         links.select("a")
             .stream()
-            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")))
+            .filter(a -> (a.attr("class").isEmpty() && a.attr("href").startsWith("/tag/")
+                    || a.className().equals("post-link with-labels")))
             .forEach(a -> result.add(a));
         return result;
     }

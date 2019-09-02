@@ -23,9 +23,6 @@ public class CrawlerController {
             @PathVariable(required = false) Integer page) throws Exception {
         log.info("Call getPage with params: category = {}, page = {}", category, page);
 
-        if (page == null) {
-            page = 1;
-        }
         return crawlerService.getLinks(category, page);
     }
 }
