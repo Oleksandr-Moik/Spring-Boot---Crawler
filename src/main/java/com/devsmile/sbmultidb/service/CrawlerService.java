@@ -1,5 +1,6 @@
 package com.devsmile.sbmultidb.service;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +23,29 @@ public class CrawlerService {
     private String mainUrl;
     private final String ARTICLE_PAGINATION_URL_PATTERN = "%s/tag/%s/page/%d";
 
+    public Map<String, String> getCategorys()throws Exception {
+        Document document = Jsoup.connect(mainUrl).get();
+        Elements links = document.select("div[class^=\"col-lg-4 col-md-4 col-sm-4 col-xs-12\"]").select("a");
+        
+        Map<String, String> linksMap = links.stream()
+                .collect(Collectors.toMap(e -> e.attr("href"), e -> e.text()));
+
+            log.info("Result linksMap: {}", linksMap);
+            return linksMap;
+    }
+    
+    public Map<String, String> getNews() throws Exception{
+        Document document = Jsoup.connect(mainUrl+"/students").get();
+        Elements links = document.select("div[id^=\"post-\"]").select("h1");
+        
+        Map<String, String> linksMap = links.stream()
+                .collect(Collectors.toMap(e -> e.attr("href"), e -> e.text()));
+
+            log.info("Result linksMap: {}", linksMap);
+        return linksMap;
+    }
+    
+    
     public Map<String, String> getLinks(String category, Integer page) throws Exception {
         if (category == null) {
             return getLinksOnPage(mainUrl, "div[class=tags-block web-view] div[class=block-title]");
